@@ -14,6 +14,7 @@ const connection = new Pool({
 const app = express();
 app.use(express.json());
 
+/* categories */
 app.get("/categories", (req, res) => {
   connection.query("SELECT * FROM categories").then((categories) => {
     res.send(categories.rows);
@@ -24,7 +25,25 @@ app.post("/categories", (req, res) => {
   const { name } = req.body;
   connection
     .query(`INSERT INTO categories (name) VALUES ('${name}')`)
-    .then((categories) => {
+    .then(() => {
+      res.sendStatus(201);
+    });
+});
+
+/* games */
+app.get("/games", (req, res) => {
+  connection.query("SELECT * FROM games").then((games) => {
+    res.send(games.rows);
+  });
+});
+
+app.post("/games", (req, res) => {
+  const { name, image, stockTotal, categoryId, pricePerDay } = req.body;
+  connection
+    .query(
+      `INSERT INTO games ("name", "image", "stockTotal", "categoryId", "pricePerDay") VALUES ('${name}','${image}',${stockTotal},${categoryId},${pricePerDay})`
+    )
+    .then(() => {
       res.sendStatus(201);
     });
 });
