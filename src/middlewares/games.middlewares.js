@@ -54,3 +54,28 @@ export async function gameBodyValidation(req, res, next) {
     res.sendStatus(500);
   }
 }
+
+export async function gameIdSearchValidation(req, res, next) {
+  const { gameId } = req.query;
+  if (!gameId) {
+    next();
+    return;
+  }
+
+  try {
+    const game = (
+      await connection.query("SELECT * FROM games WHERE id = $1;", [gameId])
+    ).rows[0];
+
+    if (!game) {
+      res.status(404).send({ message: "Jogo não encontrado" });
+      return;
+    }
+
+    res.locals.game = game;
+    next();
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+}
