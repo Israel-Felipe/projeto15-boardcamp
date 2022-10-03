@@ -5,12 +5,32 @@ import {
   readCustomers,
   updateCustomer,
 } from "../controllers/customers.controllers.js";
+import {
+  customerBodyValidation,
+  uniqueCustomerValidation,
+  customerIdValidation,
+  customerCPFValidation,
+} from "../middlewares/customers.middlewares.js";
 
 const router = express.Router();
 
 router.get("/customers", readCustomers);
-router.get("/customers/:id", readSingleCustomer);
-router.post("/customers", createCustomer);
-router.put("/customers/:id", updateCustomer);
+
+router.get("/customers/:id", customerIdValidation, readSingleCustomer);
+
+router.post(
+  "/customers",
+  customerBodyValidation,
+  uniqueCustomerValidation,
+  createCustomer
+);
+
+router.put(
+  "/customers/:id",
+  customerBodyValidation,
+  customerIdValidation,
+  customerCPFValidation,
+  updateCustomer
+);
 
 export default router;

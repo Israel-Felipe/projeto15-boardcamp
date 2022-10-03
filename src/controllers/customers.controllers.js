@@ -1,7 +1,7 @@
 import { connection } from "../database/db.js";
 
 async function readCustomers(req, res) {
-  const { cpf } = res.locals;
+  const { cpf } = req.query;
 
   try {
     if (cpf === undefined) {
