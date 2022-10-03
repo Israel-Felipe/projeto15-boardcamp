@@ -93,9 +93,55 @@ async function rentalsPossibilityValidation(req, res, next) {
   }
 }
 
+async function rentalIdValidation(req, res, next) {
+  const { id } = req.params;
+
+  try {
+    const rental = (
+      await connection.query("SELECT * FROM rentals WHERE id = $1;", [id])
+    ).rows[0];
+
+    if (!rental) {
+      res.status(404).send({ message: "Aluguel não encontrado" });
+      return;
+    }
+
+    res.locals.rental = rental;
+    next();
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
+}
+
+async function rentalNotReturnedValidation(req, res, next) {
+  const { rental } = res.locals;
+
+  if (rental.returnDate) {
+    res.status(400).send({ message: "O aluguel já foi concluído" });
+    return;
+  }
+
+  next();
+}
+
+async function rentalReturnedValidation(req, res, next) {
+  const { rental } = res.locals;
+
+  if (!rental.returnDate) {
+    res.status(400).send({ message: "O aluguel ainda está em aberto" });
+    return;
+  }
+
+  next();
+}
+
 export {
   rentalBodyValidation,
   rentalCustomerValidation,
   rentalGameValidation,
   rentalsPossibilityValidation,
+  rentalIdValidation,
+  rentalNotReturnedValidation,
+  rentalReturnedValidation,
 };
