@@ -24,17 +24,40 @@ app.get("/categories", (req, res) => {
 app.post("/categories", (req, res) => {
   const { name } = req.body;
   connection
-    .query(`INSERT INTO categories (name) VALUES ('${name}')`)
+    .query("INSERT INTO categories (name) VALUES ($1);", [name])
     .then(() => {
       res.sendStatus(201);
     });
 });
 
 /* games */
-app.get("/games", (req, res) => {
-  connection.query("SELECT * FROM games").then((games) => {
-    res.send(games.rows);
-  });
+app.get("/games", async (req, res) => {
+  const { name } = req.query;
+
+  try {
+    if (name === undefined) {
+      const games = (
+        await connection.query(
+          'SELECT games.*, categories.name AS "categoryName" FROM games JOIN categories ON games."categoryId" = categories.id;'
+        )
+      ).rows;
+
+      res.send(games);
+      return;
+    } else {
+      const games = (
+        await connection.query(
+          `SELECT games.*, categories.name AS "categoryName" FROM games JOIN categories ON games."categoryId" = categories.id WHERE games.name ILIKE ($1 || '%');`,
+          [name]
+        )
+      ).rows;
+
+      res.send(games);
+    }
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 });
 
 app.post("/games", (req, res) => {
